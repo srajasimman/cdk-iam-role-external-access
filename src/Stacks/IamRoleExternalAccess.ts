@@ -1,10 +1,10 @@
-import * as cdk from 'aws-cdk-lib';
-import * as iam from 'aws-cdk-lib/aws-iam';
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as logs from 'aws-cdk-lib/aws-logs';
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
-import * as path from 'path';
-import { Construct } from 'constructs';
+import * as cdk from "aws-cdk-lib";
+import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as logs from "aws-cdk-lib/aws-logs";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import * as path from "path";
+import { Construct } from "constructs";
 
 /**
  * Properties for the CrossAccountAccessStack
@@ -72,15 +72,24 @@ export class CrossAccountAccessStack extends cdk.Stack {
    */
   public readonly rotationFunction: lambda.Function;
 
-  constructor(scope: Construct, id: string, props: CrossAccountAccessStackProps) {
+  constructor(
+    scope: Construct,
+    id: string,
+    props: CrossAccountAccessStackProps,
+  ) {
     super(scope, id, props);
 
     // Validate required properties
     this.validateProps(props);
 
-    const roleNamePrefix = props.roleNamePrefix ?? 'cross-account-s3-access';
-    const roleDescription = props.roleDescription ?? 'Cross-account role for S3 access with external ID rotation';
-    const allowedS3Actions = props.allowedS3Actions ?? ['s3:GetObject', 's3:ListBucket'];
+    const roleNamePrefix = props.roleNamePrefix ?? "cross-account-s3-access";
+    const roleDescription =
+      props.roleDescription ??
+      "Cross-account role for S3 access with external ID rotation";
+    const allowedS3Actions = props.allowedS3Actions ?? [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ];
     const rotationDays = props.externalIdRotationDays ?? 30;
 
     // Create the external ID secret with automatic rotation
@@ -99,7 +108,7 @@ export class CrossAccountAccessStack extends cdk.Stack {
       props.s3BucketArns,
       allowedS3Actions,
       roleNamePrefix,
-      roleDescription
+      roleDescription,
     );
 
     // Create stack outputs
@@ -111,27 +120,39 @@ export class CrossAccountAccessStack extends cdk.Stack {
    */
   private validateProps(props: CrossAccountAccessStackProps): void {
     if (!props.externalAccountId || !/^\d{12}$/.test(props.externalAccountId)) {
-      throw new Error('externalAccountId must be a valid 12-digit AWS account ID');
+      throw new Error(
+        "externalAccountId must be a valid 12-digit AWS account ID",
+      );
     }
 
-    if (!props.externalPrincipalArns || props.externalPrincipalArns.length === 0) {
-      throw new Error('externalPrincipalArns must contain at least one principal ARN');
+    if (
+      !props.externalPrincipalArns ||
+      props.externalPrincipalArns.length === 0
+    ) {
+      throw new Error(
+        "externalPrincipalArns must contain at least one principal ARN",
+      );
     }
 
     if (!props.s3BucketArns || props.s3BucketArns.length === 0) {
-      throw new Error('s3BucketArns must contain at least one S3 bucket ARN');
+      throw new Error("s3BucketArns must contain at least one S3 bucket ARN");
     }
 
     // Validate principal ARNs format
     props.externalPrincipalArns.forEach((arn, index) => {
-      if (!arn.startsWith('arn:aws:iam::') || !arn.includes(props.externalAccountId)) {
-        throw new Error(`externalPrincipalArns[${index}] must be a valid IAM ARN from the external account ${props.externalAccountId}`);
+      if (
+        !arn.startsWith("arn:aws:iam::") ||
+        !arn.includes(props.externalAccountId)
+      ) {
+        throw new Error(
+          `externalPrincipalArns[${index}] must be a valid IAM ARN from the external account ${props.externalAccountId}`,
+        );
       }
     });
 
     // Validate S3 bucket ARNs format
     props.s3BucketArns.forEach((arn, index) => {
-      if (!arn.startsWith('arn:aws:s3:::')) {
+      if (!arn.startsWith("arn:aws:s3:::")) {
         throw new Error(`s3BucketArns[${index}] must be a valid S3 bucket ARN`);
       }
     });
@@ -141,13 +162,14 @@ export class CrossAccountAccessStack extends cdk.Stack {
    * Creates the Secrets Manager secret for external ID with automatic rotation
    */
   private createExternalIdSecret(rotationDays: number): secretsmanager.Secret {
-    return new secretsmanager.Secret(this, 'ExternalIdSecret', {
+    return new secretsmanager.Secret(this, "ExternalIdSecret", {
       secretName: `cross-account-external-id-${this.stackName}`,
-      description: 'External ID for cross-account role assumption with automatic rotation',
+      description:
+        "External ID for cross-account role assumption with automatic rotation",
       generateSecretString: {
-        secretStringTemplate: '{}',
-        generateStringKey: 'externalId',
-        excludeCharacters: ' "\\\'',
+        secretStringTemplate: "{}",
+        generateStringKey: "externalId",
+        excludeCharacters: " \"\\'",
         includeSpace: false,
         passwordLength: 32,
         requireEachIncludedType: true,
@@ -160,10 +182,12 @@ export class CrossAccountAccessStack extends cdk.Stack {
    * Creates the Lambda function for external ID rotation using TypeScript
    */
   private createRotationFunction(): lambda.Function {
-    const rotationRole = new iam.Role(this, 'RotationFunctionRole', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    const rotationRole = new iam.Role(this, "RotationFunctionRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
       managedPolicies: [
-        iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
+        iam.ManagedPolicy.fromAwsManagedPolicyName(
+          "service-role/AWSLambdaBasicExecutionRole",
+        ),
       ],
       inlinePolicies: {
         SecretsManagerRotation: new iam.PolicyDocument({
@@ -171,9 +195,9 @@ export class CrossAccountAccessStack extends cdk.Stack {
             new iam.PolicyStatement({
               effect: iam.Effect.ALLOW,
               actions: [
-                'secretsmanager:GetSecretValue',
-                'secretsmanager:UpdateSecretVersionStage',
-                'secretsmanager:PutSecretValue',
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:UpdateSecretVersionStage",
+                "secretsmanager:PutSecretValue",
               ],
               resources: [this.externalIdSecret.secretArn],
             }),
@@ -182,24 +206,21 @@ export class CrossAccountAccessStack extends cdk.Stack {
       },
     });
 
-    // Lambda runtime requires compiled JavaScript files
-    // CDK always runs from compiled output (dist/), so Lambda code is always at ../Lambda
-    const lambdaCodePath = path.join(__dirname, '../Lambda');
-
-    return new lambda.Function(this, 'ExternalIdRotationFunction', {
+    return new lambda.Function(this, "ExternalIdRotationFunction", {
       runtime: lambda.Runtime.NODEJS_20_X,
-      handler: 'externalIdRotation.handler',
+      handler: "externalIdRotation.handler",
       role: rotationRole,
       timeout: cdk.Duration.minutes(5),
-      code: lambda.Code.fromAsset(lambdaCodePath),
-      description: 'Lambda function to rotate external ID in Secrets Manager (TypeScript)',
+      code: lambda.Code.fromAsset(path.join(__dirname, "../Lambda")),
+      description:
+        "Lambda function to rotate external ID in Secrets Manager (TypeScript)",
       environment: {
-        NODE_ENV: 'production',
+        NODE_ENV: "production",
       },
-      logGroup: new logs.LogGroup(this, 'RotationFunctionLogGroup', {
+      logGroup: new logs.LogGroup(this, "RotationFunctionLogGroup", {
         logGroupName: `/aws/lambda/${this.stackName}-ExternalIdRotationFunction`,
         retention: logs.RetentionDays.TWO_YEARS,
-    }),
+      }),
     });
   }
 
@@ -207,7 +228,7 @@ export class CrossAccountAccessStack extends cdk.Stack {
    * Sets up automatic rotation for the external ID secret
    */
   private setupSecretRotation(rotationDays: number): void {
-    new secretsmanager.RotationSchedule(this, 'ExternalIdRotationSchedule', {
+    new secretsmanager.RotationSchedule(this, "ExternalIdRotationSchedule", {
       secret: this.externalIdSecret,
       rotationLambda: this.rotationFunction,
       automaticallyAfter: cdk.Duration.days(rotationDays),
@@ -223,13 +244,15 @@ export class CrossAccountAccessStack extends cdk.Stack {
     s3BucketArns: string[],
     allowedS3Actions: string[],
     roleNamePrefix: string,
-    roleDescription: string
+    roleDescription: string,
   ): iam.Role {
     // Create the IAM role with external principals
-    const role = new iam.Role(this, 'CrossAccountRole', {
+    const role = new iam.Role(this, "CrossAccountRole", {
       roleName: `${roleNamePrefix}-${this.region}-${cdk.Aws.ACCOUNT_ID}`,
       description: roleDescription,
-      assumedBy: new iam.CompositePrincipal(...externalPrincipalArns.map(arn => new iam.ArnPrincipal(arn))),
+      assumedBy: new iam.CompositePrincipal(
+        ...externalPrincipalArns.map((arn) => new iam.ArnPrincipal(arn)),
+      ),
       maxSessionDuration: cdk.Duration.hours(1), // Limit session duration for security
     });
 
@@ -238,13 +261,15 @@ export class CrossAccountAccessStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.DENY,
         principals: [new iam.AnyPrincipal()],
-        actions: ['sts:AssumeRole'],
+        actions: ["sts:AssumeRole"],
         conditions: {
           StringNotEquals: {
-            'sts:ExternalId': this.externalIdSecret.secretValueFromJson('externalId').unsafeUnwrap(),
+            "sts:ExternalId": this.externalIdSecret
+              .secretValueFromJson("externalId")
+              .unsafeUnwrap(),
           },
         },
-      })
+      }),
     );
 
     // Add secure transport condition
@@ -252,13 +277,13 @@ export class CrossAccountAccessStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.DENY,
         principals: [new iam.AnyPrincipal()],
-        actions: ['sts:AssumeRole'],
+        actions: ["sts:AssumeRole"],
         conditions: {
           Bool: {
-            'aws:SecureTransport': 'false',
+            "aws:SecureTransport": "false",
           },
         },
-      })
+      }),
     );
 
     // Create S3 permission policy with least privilege
@@ -270,10 +295,10 @@ export class CrossAccountAccessStack extends cdk.Stack {
           resources: s3BucketArns,
           conditions: {
             Bool: {
-              'aws:SecureTransport': 'true', // Enforce HTTPS
+              "aws:SecureTransport": "true", // Enforce HTTPS
             },
             StringEquals: {
-              's3:x-amz-server-side-encryption': 'AES256', // Enforce encryption
+              "s3:x-amz-server-side-encryption": "AES256", // Enforce encryption
             },
           },
         }),
@@ -282,16 +307,16 @@ export class CrossAccountAccessStack extends cdk.Stack {
 
     // Attach the S3 policy to the role
     role.attachInlinePolicy(
-      new iam.Policy(this, 'CrossAccountS3Policy', {
-        policyName: 'S3AccessPolicy',
+      new iam.Policy(this, "CrossAccountS3Policy", {
+        policyName: "S3AccessPolicy",
         document: s3PolicyDocument,
-      })
+      }),
     );
 
     // Add tags for governance
-    cdk.Tags.of(role).add('Purpose', 'CrossAccountS3Access');
-    cdk.Tags.of(role).add('ExternalAccount', externalAccountId);
-    cdk.Tags.of(role).add('CreatedBy', 'CDK');
+    cdk.Tags.of(role).add("Purpose", "CrossAccountS3Access");
+    cdk.Tags.of(role).add("ExternalAccount", externalAccountId);
+    cdk.Tags.of(role).add("CreatedBy", "CDK");
 
     return role;
   }
@@ -300,32 +325,34 @@ export class CrossAccountAccessStack extends cdk.Stack {
    * Creates stack outputs
    */
   private createStackOutputs(): void {
-    new cdk.CfnOutput(this, 'CrossAccountRoleArn', {
+    new cdk.CfnOutput(this, "CrossAccountRoleArn", {
       value: this.crossAccountRole.roleArn,
-      description: 'ARN of the cross-account IAM role',
+      description: "ARN of the cross-account IAM role",
       exportName: `${this.stackName}-RoleArn`,
     });
 
-    new cdk.CfnOutput(this, 'CrossAccountRoleName', {
+    new cdk.CfnOutput(this, "CrossAccountRoleName", {
       value: this.crossAccountRole.roleName,
-      description: 'Name of the cross-account IAM role',
+      description: "Name of the cross-account IAM role",
       exportName: `${this.stackName}-RoleName`,
     });
 
-    new cdk.CfnOutput(this, 'ExternalIdSecretArn', {
+    new cdk.CfnOutput(this, "ExternalIdSecretArn", {
       value: this.externalIdSecret.secretArn,
-      description: 'ARN of the Secrets Manager secret containing the external ID',
+      description:
+        "ARN of the Secrets Manager secret containing the external ID",
       exportName: `${this.stackName}-ExternalIdSecretArn`,
     });
 
-    new cdk.CfnOutput(this, 'AssumeRoleInstructions', {
+    new cdk.CfnOutput(this, "AssumeRoleInstructions", {
       value: JSON.stringify({
         roleArn: this.crossAccountRole.roleArn,
         externalIdSecretArn: this.externalIdSecret.secretArn,
         awsCliExample: `aws sts assume-role --role-arn ${this.crossAccountRole.roleArn} --role-session-name CrossAccountAccess --external-id $(aws secretsmanager get-secret-value --secret-id ${this.externalIdSecret.secretArn} --query SecretString --output text | jq -r .externalId)`,
-        sdkExample: 'Use the external ID from Secrets Manager when calling AssumeRole',
+        sdkExample:
+          "Use the external ID from Secrets Manager when calling AssumeRole",
       }),
-      description: 'Instructions for assuming the cross-account role',
+      description: "Instructions for assuming the cross-account role",
       exportName: `${this.stackName}-Instructions`,
     });
   }
