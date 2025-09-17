@@ -21,12 +21,21 @@
     "experimentalDecorators": true,
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
+    "isolatedModules": true,
+    "outDir": "./dist",
+    "rootDir": "./",
     "typeRoots": [
       "./node_modules/@types"
     ]
   },
+  "include": [
+    "src/**/*",
+    "bin/**/*",
+    "test/**/*"
+  ],
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "dist"
   ]
 }
