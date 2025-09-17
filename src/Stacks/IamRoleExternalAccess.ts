@@ -196,7 +196,10 @@ export class CrossAccountAccessStack extends cdk.Stack {
       environment: {
         NODE_ENV: 'production',
       },
-      logRetention: logs.RetentionDays.TWO_YEARS,
+      logGroup: new logs.LogGroup(this, 'RotationFunctionLogGroup', {
+        logGroupName: `/aws/lambda/${this.stackName}-ExternalIdRotationFunction`,
+        retention: logs.RetentionDays.TWO_YEARS,
+    }),
     });
   }
 
