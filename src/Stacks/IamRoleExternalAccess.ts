@@ -182,11 +182,9 @@ export class CrossAccountAccessStack extends cdk.Stack {
       },
     });
 
-    // Determine the correct path based on whether we're in development or production mode
-    const isProduction = process.env.CDK_PROD === '1';
-    const lambdaCodePath = isProduction 
-      ? path.join(__dirname, '../Lambda')     // Compiled output: dist/src/Lambda
-      : path.join(__dirname, '../Lambda');    // Source files for development
+    // Lambda runtime requires compiled JavaScript files
+    // CDK always runs from compiled output (dist/), so Lambda code is always at ../Lambda
+    const lambdaCodePath = path.join(__dirname, '../Lambda');
 
     return new lambda.Function(this, 'ExternalIdRotationFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,

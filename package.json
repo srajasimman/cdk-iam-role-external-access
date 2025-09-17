@@ -9,11 +9,11 @@
     "clean": "rm -rf dist",
     "copy-lambda": "cp -r src/Lambda/package.json dist/src/Lambda/ 2>/dev/null || true",
     "watch": "tsc -w",
-    "test": "jest",
-    "cdk": "cdk",
-    "cdk:prod": "CDK_PROD=1 cdk",
-    "deploy": "npm run build && CDK_PROD=1 cdk deploy",
-    "synth": "npm run build && CDK_PROD=1 cdk synth",
+    "test": "npm run build && jest",
+    "cdk": "npm run build && cdk",
+    "deploy": "npm run build && cdk deploy",
+    "synth": "npm run build && cdk synth",
+    "diff": "npm run build && cdk diff", 
     "prebuild": "npm run clean"
   },
   "devDependencies": {

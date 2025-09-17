@@ -1,5 +1,5 @@
 {
-  "app": "bash -c 'if [ \"$CDK_PROD\" = \"1\" ]; then node dist/bin/app.js; else npx ts-node --prefer-ts-exts bin/app.ts; fi'",
+  "app": "node dist/bin/app.js",
   "watch": {
     "include": [
       "**"
