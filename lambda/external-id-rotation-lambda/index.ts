@@ -234,4 +234,3 @@ function generateSecureExternalId(): string {
 
   return result;
 }
-
