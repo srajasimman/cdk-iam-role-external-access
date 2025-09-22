@@ -1,5 +1,5 @@
 import * as cdk from "aws-cdk-lib";
-import { CrossAccountAccessStack } from "../src/index";
+import { CrossAccountAccessStack } from "iam-role-external-access";
 
 /**
  * Example configurations for different use cases

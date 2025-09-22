@@ -211,7 +211,7 @@ export class CrossAccountAccessStack extends cdk.Stack {
       handler: "externalIdRotation.handler",
       role: rotationRole,
       timeout: cdk.Duration.minutes(5),
-      code: lambda.Code.fromAsset(path.join(__dirname, "../Lambda")),
+      code: lambda.Code.fromAsset(path.join(__dirname, "../lambda/external-id-rotation-lambda")),
       description:
         "Lambda function to rotate external ID in Secrets Manager (TypeScript)",
       environment: {

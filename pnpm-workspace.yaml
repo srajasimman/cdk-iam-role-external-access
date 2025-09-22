@@ -1,0 +1,5 @@
+packages:
+  # Main application
+  - "."
+  # Lambda functions
+  - "lambda/*"

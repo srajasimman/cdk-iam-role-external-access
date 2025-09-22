@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import { Template, Match } from "aws-cdk-lib/assertions";
-import { CrossAccountAccessStack } from "../src/index";
+import { CrossAccountAccessStack } from "../lib/index";
 
 describe("CrossAccountAccessStack", () => {
   const defaultProps = {
