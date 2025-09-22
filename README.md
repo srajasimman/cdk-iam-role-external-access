@@ -228,19 +228,6 @@ The stack provides these outputs:
 
 ## Development
 
-### Project Structure
-```
-├── src/
-│   ├── Lambda/
-│   │   ├── externalIdRotation.ts    # TypeScript Lambda function
-│   │   └── package.json             # Lambda dependencies
-│   └── Stacks/
-│       └── IamRoleExternalAccess.ts # CDK stack definition
-├── test/                            # Jest unit tests (23 tests)
-├── bin/app.ts                       # CDK application entry point
-└── dist/                           # Compiled TypeScript output
-```
-
 ### Build Process
 - **Development**: Uses TypeScript source files directly
 - **Production**: Compiles to JavaScript in `dist/` folder
